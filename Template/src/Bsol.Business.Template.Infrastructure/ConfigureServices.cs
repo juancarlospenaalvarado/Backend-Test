@@ -2,10 +2,12 @@
 using System.Reflection;
 using Bsol.Business.Template.Core.Interfaces.Services;
 using Bsol.Business.Template.Infrastructure.Data;
+using Bsol.Business.Template.Infrastructure.Seeds;
 using Bsol.Business.Template.Infrastructure.Services;
 using Bsol.Business.Template.SharedKernel;
 using Bsol.Business.Template.SharedKernel.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -70,4 +72,5 @@ public static class ConfigureServices
         });
         return services;
     }
+
 }

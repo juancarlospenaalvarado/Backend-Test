@@ -3,11 +3,15 @@ using Bsol.Business.Template.Api;
 using Bsol.Business.Template.Api.Extensions;
 using Bsol.Business.Template.Core;
 using Bsol.Business.Template.Infrastructure;
+using Bsol.Business.Template.Infrastructure.Data;
+using Bsol.Business.Template.Infrastructure.Seeds;
 using Destructurama;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using HealthChecks.UI.Client;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +27,7 @@ builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddCoreServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+
 if (!builder.Environment.IsProduction())
 {
     string[] origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
@@ -34,7 +39,6 @@ if (!builder.Environment.IsProduction())
 }
 
 var app = builder.Build();
-
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(app.Configuration)
     .Enrich.FromLogContext()
@@ -46,6 +50,23 @@ Log.Logger = new LoggerConfiguration()
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    // Asegura que la DB exista
+    await context.Database.MigrateAsync();
+
+    // Evitar duplicados
+    if (!context.Account.Any())
+    {
+        var accounts = AccountSeed.SeedAccount();
+
+        await context.Account.AddRangeAsync(accounts);
+        await context.SaveChangesAsync();
+    }
 }
 
 app.UseFastEndpoints(c =>

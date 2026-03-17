@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Ardalis.SharedKernel;
 using Bsol.Business.Template.Core.Interfaces.Services;
 using Bsol.Business.Template.Core.TemplateAggregate.Specifications;
-using Bsol.Business.Template.SharedKernel.Interfaces;
 
 
 namespace Bsol.Business.Template.Core.UseCases.Template;
@@ -32,6 +26,7 @@ public class CreateTemplateCommandHandler(SharedKernel.Interfaces.IRepository<Te
             {
                 return Result.Error("Ya existe una Template con el mismo nombre");
             }
+
             var newTemplate = new TemplateAggregate.Template(request.Name);
             var resultCreate = await _repository.AddAsync(newTemplate, cancellationToken);
 

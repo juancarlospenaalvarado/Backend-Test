@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Bsol.Business.Template.Infrastructure.Seeds;
 using Bsol.Business.Template.SharedKernel;
 using Bsol.Business.Template.SharedKernel.Audit;
 using Bsol.Business.Template.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bsol.Business.Template.Infrastructure.Data;
 
@@ -28,9 +30,12 @@ public class AppDbContext : DbContext
 
     }
     public DbSet<Core.TemplateAggregate.Template> Template { get; set; }
+    public DbSet<Core.TransactionAggregate.Transaction> Transaction{ get; set; }
+    public DbSet<Core.AccountAggregate.Account> Account { get; set; }
 
     //User For Audits
     public DbSet<Audit> Audits { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -201,6 +206,27 @@ public class AppDbContext : DbContext
                         auditEntry.NewValues[propName] = prop.CurrentValue;
                     }
                     break;
+            }
+        }
+    }
+
+    public static class DbSeeder
+    {
+        public static async Task SeedAsync(IServiceProvider services)
+        {
+            using var scope = services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // Asegura que la DB exista
+            await context.Database.MigrateAsync();
+
+            // Evitar duplicados
+            if (!context.Account.Any())
+            {
+                var accounts = AccountSeed.SeedAccount();
+
+                await context.Account.AddRangeAsync(accounts);
+                await context.SaveChangesAsync();
             }
         }
     }

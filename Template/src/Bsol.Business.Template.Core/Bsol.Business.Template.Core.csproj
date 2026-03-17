@@ -29,7 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="AccountAggregate\ValueObjects\" />
     <Folder Include="TemplateAggregate\ValueObjects\" />
+    <Folder Include="TransactionAggregate\Specifications\" />
+    <Folder Include="TransactionAggregate\ValueObjects\" />
   </ItemGroup>
 
 </Project>
